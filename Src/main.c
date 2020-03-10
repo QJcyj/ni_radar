@@ -28,7 +28,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stmflash.h"
+#include "delay.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,14 +39,19 @@ extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 
-uint8_t CMD_Buf[7];
-#define Cmd_size	7
+uint8_t CMD_Buf[8]={0,2,4,3,6,0,0,0};
+#define Cmd_size	8
 
 uint8_t	Radar1_Rec_Buf[24];
 #define Radar1_size	8
 
 uint8_t	Radar2_Rec_Buf[24];
 #define Radar2_size	8
+
+//要写入到STM32 FLASH的字符串数组
+//uint8_t TEXT_Buffer[]={"STM32F103 FLASH TEST"};
+#define SIZE sizeof(CMD_Buf)		//数组长度
+#define FLASH_SAVE_ADDR  0X0800F000		//设置FLASH 保存地址(必须为偶数，且其值要大于本代码所占用FLASH的大小+0X08000000)  第60页
 
 /* USER CODE END PTD */
 
@@ -83,7 +89,7 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	uint8_t datatemp[SIZE];
   /* USER CODE END 1 */
   
 
@@ -122,7 +128,11 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+		STMFLASH_Read(FLASH_SAVE_ADDR,(uint16_t*)datatemp,SIZE);
+		HAL_UART_Transmit_DMA(&huart1, datatemp, 8);
+		for(uint16_t i = 0; i<1100; i++)
+			for(uint16_t j=170; j>0; j--);
+//	  delay_ms(20);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -168,9 +178,14 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if(huart == &huart2)
-	{
-		HAL_UART_Transmit_DMA(&huart1, Radar1_Rec_Buf, 8);
+//	if(huart == &huart2)
+//	{
+////		HAL_UART_Transmit_DMA(&huart1, Radar1_Rec_Buf, 8);
+//	}
+	if(huart == &huart1){
+		if(CMD_Buf[0] == 0X01){
+			STMFLASH_Write(FLASH_SAVE_ADDR,(uint16_t*)CMD_Buf,SIZE);
+		}
 	}
 }
 /* USER CODE END 4 */
