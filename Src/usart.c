@@ -54,9 +54,7 @@ void MX_USART1_UART_Init(void)
   {
     Error_Handler();
   }
-//  __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);          //使能IDLE中断
-//  HAL_UART_Receive_DMA(&huart1,CMD_Buf,7);
- 
+
 }
 /* USART2 init function */
 
@@ -75,8 +73,7 @@ void MX_USART2_UART_Init(void)
   {
     Error_Handler();
   }
-//  __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);          //使能IDLE中断
-//	HAL_UART_Receive_DMA(&huart2,Radar1_Rec_Buf,7);
+
 }
 /* USART3 init function */
 
@@ -95,8 +92,7 @@ void MX_USART3_UART_Init(void)
   {
     Error_Handler();
   }
-//	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);          //使能IDLE中断
-//  HAL_UART_Receive_DMA(&huart3,Radar2_Rec_Buf,7);
+
 }
 
 void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)

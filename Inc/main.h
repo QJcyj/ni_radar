@@ -60,8 +60,6 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define RADAR_MODE_Pin GPIO_PIN_0
 #define RADAR_MODE_GPIO_Port GPIOB
-#define LED_CONTROL1_Pin GPIO_PIN_12
-#define LED_CONTROL1_GPIO_Port GPIOB
 #define LED_CONTROL2_Pin GPIO_PIN_13
 #define LED_CONTROL2_GPIO_Port GPIOB
 #define LED_CONTROL3_Pin GPIO_PIN_14

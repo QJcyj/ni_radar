@@ -61,9 +61,9 @@ uint8_t	Radar2_Rec_Buf[27];
 
 #define Radar_Mode PBin(0)
 #define LED_Mode   PBin(15)
-#define LED_1 	   PBout(13)
-#define LED_2      PBout(14)
-#define LED_3      PBout(12)
+#define LED_1 	   PAout(15)
+#define LED_2      PBout(3)
+#define LED_3      PBout(4)
 
 /* USER CODE END PD */
 
@@ -169,19 +169,19 @@ int main(void)
     /* USER CODE BEGIN 3 */
 //	  printf("RA1:%s\n",Radar1_Rec_Buf);
 	  
-	  LED_1 = 0;
-	  LED_2 = 0;
-	  printf("LED_1=%d LED_2=%d \n",(uint16_t)LED_1,(uint16_t)LED_2);
-//	  Radar1_hand();
-//	  Radar2_hand();
+//	  LED_1 = 0;
+//	  LED_2 = 0;
+//	  printf("LED_1=%d LED_2=%d \n",(uint16_t)LED_1,(uint16_t)LED_2);
+	  Radar1_hand();
+	  Radar2_hand();
 //	  	STMFLASH_Read(FLASH_SAVE_ADDR,(uint16_t*)datatemp,SIZE);
 //		HAL_UART_Transmit_DMA(&huart1, param, 28);
 
-	  delay_ms(1000);
-	  LED_1 = 1;
-	  LED_2 = 1;
-	  printf("LED_1=%d LED_2=%d \n",(uint16_t)LED_1,(uint16_t)LED_2);
-	  delay_ms(1000);
+//	  delay_ms(1000);
+//	  LED_1 = 1;
+//	  LED_2 = 1;
+//	  printf("LED_1=%d LED_2=%d \n",(uint16_t)LED_1,(uint16_t)LED_2);
+//	  delay_ms(100);
   }
   /* USER CODE END 3 */
 }
@@ -346,7 +346,7 @@ void Radar2_hand(void)
 		distance = (float)(buffer[2] + buffer[3]*256)/100;
 		printf("distance2=%f \n",distance);
 		if(LED_Mode){
-			if((time_10ms%100==0) && (distance<0.6)){
+			if((time_10ms%200==0) && (distance<0.6)){
 				LED_1 ^= 1;
 				LED_2 ^= 1;
 				LED_3 ^= 0;
@@ -371,14 +371,14 @@ void Radar2_hand(void)
 			else if(distance>0.3 && distance<=0.6){
 				LED_2 = 0;
 				LED_3 = 0;
-				if((time_10ms%20==0) && (distance<0.6)){
+				if((time_10ms%100==0) && (distance<0.6)){
 					LED_1 ^= 1;
 				}
 			}
 			else if(distance>0.6 && distance<=0.9){
 				LED_2 = 0;
 				LED_3 = 0;
-				if((time_10ms%20==0) && (distance<0.6)){
+				if((time_10ms%100==0) && (distance<0.6)){
 					LED_1 ^= 1;
 				}
 			}
@@ -484,7 +484,7 @@ void Radar1_hand(void)
 		
 //		printf("distance1=%f \n",distance);
 		if(LED_Mode){
-			if((time_10ms%100==0) && (distance<3.0)){
+			if((time_10ms%200==0) && (distance<3.0)){
 				LED_1 ^= 1;
 				LED_2 ^= 1;
 				LED_3 = 0;
@@ -507,19 +507,19 @@ void Radar1_hand(void)
 			}
 			else if(distance>0.3 && distance<=0.6){
 				LED_2 = 0;
-				if((time_10ms%20==0) && (distance<0.6)){
+				if((time_10ms%200==0) && (distance<0.6)){
 					LED_1 ^= 1;
 				}
 			}
 			else if(distance>0.6 && distance<=0.9){
 				LED_2 = 0;
-				if((time_10ms%20==0) && (distance<0.6)){
+				if((time_10ms%50==0) && (distance<0.6)){
 					LED_1 ^= 1;
 				}
 			}
 			else if(distance>0.9 && distance<=1.5){
 				LED_2 = 0;
-				if((time_10ms%50==0) && (distance<0.6)){
+				if((time_10ms%100==0) && (distance<0.6)){
 					LED_1 ^= 1;
 				}
 			}
