@@ -6,15 +6,35 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //用户根据自己的需要设置
-#define STM32_FLASH_SIZE 	64 	 		//所选STM32的FLASH容量大小(单位为K)
+#define STM32_FLASH_SIZE 	128 	 		//所选STM32的FLASH容量大小(单位为K)
 #define STM32_FLASH_WREN 	1              	//使能FLASH写入(0，不是能;1，使能)
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //FLASH起始地址
 #define STM32_FLASH_BASE 0x08000000 		//STM32 FLASH的起始地址
-//FLASH解锁键值
-//#define FLASH_KEY1               0X45670123
-//#define FLASH_KEY2               0XCDEF89AB
+
+#define FLASH_SAVE_ADDR  0X0800F000		//数据保存地址   0x08000000 +  设定区   60K处  F000
+
+#define	RADAR1_A_STEP12_DIS	0x00		//雷达1 模式A 步骤1 2 数据存储地址
+#define	RADAR1_A_STEP3_BIG	0x04		//雷达1 模式A 步骤3 大距离数据存储地址
+#define	RADAR1_A_STEP3_MIN	0x08		//雷达1 模式A 步骤3 小距离数据存储地址
+
+#define	RADAR1_B_STEP12_DIS	0x0C
+#define	RADAR1_B_STEP3_DIS	0x10
+#define	RADAR1_B_STEP4_DIS	0x14
+#define	RADAR1_B_STEP5_DIS	0x18
+
+
+#define	RADAR2_A_STEP12_DIS	0x1C
+#define	RADAR2_A_STEP3_BIG	0x20
+#define	RADAR2_A_STEP3_MIN	0x24
+
+#define	RADAR2_B_STEP12_DIS	0x28
+#define	RADAR2_B_STEP3_DIS	0x2C
+#define	RADAR2_B_STEP4_DIS	0x30
+#define	RADAR2_B_STEP5_DIS	0x34
+
+
 
 void STMFLASH_Unlock(void);					  //FLASH解锁
 void STMFLASH_Lock(void);					  //FLASH上锁

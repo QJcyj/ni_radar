@@ -21,9 +21,10 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-extern uint8_t CMD_Buf[7];
-extern uint8_t	Radar1_Rec_Buf[24];
-extern uint8_t	Radar2_Rec_Buf[24];
+#include "stdio.h"
+extern uint8_t CMD_Buf[5];
+extern uint8_t	Radar1_Rec_Buf[27];
+extern uint8_t	Radar2_Rec_Buf[27];
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
@@ -371,7 +372,15 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 } 
 
 /* USER CODE BEGIN 1 */
-
+int fputc(int c, FILE *stream)    //重写fputc函数
+{
+ /*
+    huart1是工具生成代码定义的UART1结构体，
+    如果以后要使用其他串口打印，只需要把这个结构体改成其他UART结构体。
+*/
+    HAL_UART_Transmit(&huart1, (unsigned char *)&c, 1, 1000);   
+    return 1;
+}
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
