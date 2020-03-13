@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=F:/CreativeCenter/radar/main_src/Inc
+HeaderPath=D:/Desktop/main_src/Inc
 HeaderFiles=gpio.h;dma.h;i2c.h;usart.h;stm32f1xx_it.h;stm32f1xx_hal_conf.h;main.h;tim.h;
-SourcePath=F:/CreativeCenter/radar/main_src/Src
+SourcePath=D:/Desktop/main_src/Src
 SourceFiles=gpio.c;dma.c;i2c.c;usart.c;stm32f1xx_it.c;stm32f1xx_hal_msp.c;main.c;tim.c;
 
 [PreviousLibFiles]
@@ -11,4 +11,7 @@ LibFiles=Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_i2c.h;Drivers/STM32F1xx_
 SourceFiles=..\Src\main.c;..\Src\gpio.c;..\Src\dma.c;..\Src\i2c.c;..\Src\tim.c;..\Src\usart.c;..\Src\stm32f1xx_it.c;..\Src\stm32f1xx_hal_msp.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c;../\Src/system_stm32f1xx.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c;../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c;../\Src/system_stm32f1xx.c;../Drivers/CMSIS/Device/ST/STM32F1xx/Source/Templates/system_stm32f1xx.c;null;
 HeaderPath=..\Drivers\STM32F1xx_HAL_Driver\Inc;..\Drivers\STM32F1xx_HAL_Driver\Inc\Legacy;..\Drivers\CMSIS\Device\ST\STM32F1xx\Include;..\Drivers\CMSIS\Include;..\Inc;
 CDefines=USE_HAL_DRIVER;STM32F103xB;USE_HAL_DRIVER;STM32F103xB;
+
+[]
+SourceFiles=;;
 
