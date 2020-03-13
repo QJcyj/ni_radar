@@ -44,8 +44,31 @@
 /* USER CODE BEGIN PD */
 
 //?д??STM32 FLASH???????????
+//3米 0x01,0x2C  1.5米 0x00,0x96,0.9米  0x00,0x5A, 
+//0.6米0x00,0x3C, 0.3米0x00,0x1E,
+uint8_t param[28]={
+	0x01,0x2C, 0x00,0x5A,  0x00,0x1E,
+	0x00,0x96, 0x00,0x5A,  0x00,0x3C,
+	0x00,0x1E, 0x00,0x3C,  0x00,0x5A,
+	0x00,0x1E, 0x00,0x96,  0x00,0x5A,
+	0x00,0x3C, 0x00,0x1E,
+};
 
-uint8_t param[28]={0};
+#define Con1A_12		((param[0]*256+param[1])/100)
+#define Con1A_3_max		((param[2]*256+param[3])/100)
+#define Con1A_3_min		((param[4]*256+param[5])/100)
+#define Con1B_12		((param[6]*256+param[7])/100)
+#define Con1B_3			((param[8]*256+param[9])/100)
+#define Con1B_4			((param[10]*256+param[11])/100)
+#define Con1B_5			((param[12]*256+param[13])/100)
+
+#define Con2A_12		((param[14]*256+param[15])/100)
+#define Con2A_3_max		((param[16]*256+param[17])/100)
+#define Con2A_3_min		((param[18]*256+param[19])/100)
+#define Con2B_12		((param[20]*256+param[21])/100)
+#define Con2B_3			((param[22]*256+param[23])/100)
+#define Con2B_4			((param[24]*256+param[25])/100)
+#define Con2B_5			((param[26]*256+param[27])/100)
 
 uint8_t CMD_Buf[5]={0,0,0,0,0};
 #define Cmd_size	5
@@ -59,16 +82,19 @@ uint8_t	Radar1_Rec_Buf[27];
 uint8_t	Radar2_Rec_Buf[27];
 #define Radar2_size	27
 
-#define Radar_Mode PBin(0)
-#define LED_Mode   PBin(15)
-#define LED_1 	   PAout(15)
-#define LED_2      PBout(3)
-#define LED_3      PBout(4)
+#define Control_Mode 	PBin(0)
+#define LED_Mode   		PBin(15)
+#define LED_1 	   		PAout(15)
+#define LED_2      		PBout(3)
+#define LED_3      		PAout(11)
+#define ExCon1			PBout(4)
+#define ExCon2			PBout(5)
 
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+bool Radar_Flag = false;
 enum  Radar
 {
 	FIX1,
@@ -83,6 +109,8 @@ enum  Radar
 };
 enum Radar state1 = FIX1;
 enum Radar state2 = FIX1;
+
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -92,20 +120,18 @@ extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 extern TIM_HandleTypeDef htim2;
-uint16_t time_10ms = 0;
+uint16_t time_1ms = 0;
 
 bool Radar1_ok = false;
 bool Radar2_ok = false;
 
-bool Radar_siwch = false;
-bool LED_control = false;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-void Radar1_hand(void);
-void Radar2_hand(void);
+void RadarB_hand(void);
+void RadarA_hand(void);
 void Radar_Data_Set(uint8_t *cmd);
 void ParamLoad(void);
 /* USER CODE END PFP */
@@ -153,10 +179,17 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   delay_init(72);
+  HAL_TIM_Base_Start_IT(&htim2);
 	HAL_UART_Receive_DMA(&huart1,CMD_Buf,Cmd_size);
 	HAL_UART_Receive_DMA(&huart2,Radar1_Rec_Buf,Radar1_size);
 	HAL_UART_Receive_DMA(&huart3,Radar2_Rec_Buf,Radar2_size);
-	ParamLoad();
+	uint16_t start = 0;
+	start = STMFLASH_ReadHalfWord(LOAD_PARAM);
+	if(start==0xFF){
+		STMFLASH_WriteHalfWord(LOAD_PARAM,(uint16_t)(0xAA));
+		STMFLASH_Write(FLASH_SAVE_ADDR,(uint16_t*)param,SIZE);
+		ParamLoad();
+	}
 //	STMFLASH_Read(FLASH_SAVE_ADDR,(uint16_t*)datatemp,SIZE);
   /* USER CODE END 2 */
 
@@ -167,21 +200,20 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	  printf("RA1:%s\n",Radar1_Rec_Buf);
+	if(!Radar_Flag){
+		RadarA_hand();
+	}
+	else{
+		RadarB_hand();
+	}
+//	printf("Radar_Flag %d\n",Radar_Flag);
 	  
 //	  LED_1 = 0;
 //	  LED_2 = 0;
-//	  printf("LED_1=%d LED_2=%d \n",(uint16_t)LED_1,(uint16_t)LED_2);
-	  Radar1_hand();
-	  Radar2_hand();
+//	  printf("LED_1=%d LED_2=%d \n",(uint16_t)LED_1,(uint16_t)LED_2); 
 //	  	STMFLASH_Read(FLASH_SAVE_ADDR,(uint16_t*)datatemp,SIZE);
 //		HAL_UART_Transmit_DMA(&huart1, param, 28);
 
-//	  delay_ms(1000);
-//	  LED_1 = 1;
-//	  LED_2 = 1;
-//	  printf("LED_1=%d LED_2=%d \n",(uint16_t)LED_1,(uint16_t)LED_2);
-//	  delay_ms(100);
   }
   /* USER CODE END 3 */
 }
@@ -227,16 +259,13 @@ void SystemClock_Config(void)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart == &huart2){
-//		HAL_UART_Transmit_DMA(&huart1, Radar1_Rec_Buf, 9);
-//		Radar_Data_Set(CMD_Buf);
-//		Radar1_hand();
+		Radar_Flag = true;
 	}
 	if(huart == &huart3){
-//		printf("Radar2 data \n");
-//		printf("Radar2 %s \n",Radar2_Rec_Buf);
+
 	}
 	if(huart == &huart1){
-		HAL_UART_Transmit_DMA(&huart1, CMD_Buf, 5);
+//		HAL_UART_Transmit_DMA(&huart1, CMD_Buf, 5);
 		Radar_Data_Set(CMD_Buf);
 	}
 }
@@ -246,9 +275,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if(htim->Instance == htim2.Instance)
 	{
-		time_10ms ++;
-		if(time_10ms >= 60000){
-			time_10ms = 0;
+		time_1ms ++;
+		if(time_1ms >= 60000){
+			time_1ms = 0;
 		}
 	}
 
@@ -265,7 +294,7 @@ uint8_t check_sum(uint8_t *data)
 	sum = crc_sum&0xff;
 	return sum;
 }
-void Radar2_hand(void)
+void RadarB_hand(void)
 {
 	uint8_t c;
 	uint8_t buffer[9];
@@ -279,17 +308,17 @@ void Radar2_hand(void)
 		switch(c)
 		{
 			case FIX1:
-				if(Radar2_Rec_Buf[i] == 0x59){
+				if(Radar1_Rec_Buf[i] == 0x59){
 					state2 = FIX2;
-					buffer[0] = Radar2_Rec_Buf[i];
+					buffer[0] = Radar1_Rec_Buf[i];
 				}
 				else{
 					state2 = FIX1;
 				}
 				break;
 			case FIX2:
-				if(Radar2_Rec_Buf[i] == 0x59){
-					buffer[1] = Radar2_Rec_Buf[i];
+				if(Radar1_Rec_Buf[i] == 0x59){
+					buffer[1] = Radar1_Rec_Buf[i];
 					state2 = DIS_L;
 				}
 				else{
@@ -297,35 +326,35 @@ void Radar2_hand(void)
 				}
 				break;
 			case DIS_L:
-				buffer[2] = Radar2_Rec_Buf[i];
+				buffer[2] = Radar1_Rec_Buf[i];
 				state2 = DIS_H;
 				break;
 				
 			case DIS_H:
-				buffer[3] = Radar2_Rec_Buf[i];
+				buffer[3] = Radar1_Rec_Buf[i];
 				state2 = STR_1;
 				break;
 			case STR_1:
-				buffer[4] = Radar2_Rec_Buf[i];
+				buffer[4] = Radar1_Rec_Buf[i];
 				state2 = STR_2;
 				break;
 			case STR_2:
-				buffer[5] = Radar2_Rec_Buf[i];
+				buffer[5] = Radar1_Rec_Buf[i];
 				state2 = MODE;
 				break;
 			case MODE:
-				buffer[6] = Radar2_Rec_Buf[i];
+				buffer[6] = Radar1_Rec_Buf[i];
 				state2 = SAVE;
 				break;
 			case SAVE:
-				buffer[7] = Radar2_Rec_Buf[i];
+				buffer[7] = Radar1_Rec_Buf[i];
 				state2 = ChceckSum;
 				break;
 			case ChceckSum:
-				printf("buf=%02x crc=%02x\n",Radar2_Rec_Buf[i],check_sum(buffer));
-				if( Radar2_Rec_Buf[i] == check_sum(buffer)){
+//				printf("buf=%02x crc=%02x\n",Radar1_Rec_Buf[i],check_sum(buffer));
+				if( Radar1_Rec_Buf[i] == check_sum(buffer)){
 					Radar2_ok = true;
-					printf("sum ok\n");
+//					printf("sum ok\n");
 				}
 				break;
 			default:
@@ -339,60 +368,65 @@ void Radar2_hand(void)
 	state2 = FIX1;
 	
 //control A
-	printf("Radar_Mode=%d 2_ok=%d\n",(uint16_t)Radar_Mode ,Radar2_ok );
-	if(Radar2_ok && (Radar_Mode == 0)){
+//	printf("Radar_Mode=%d 2_ok=%d\n",(uint16_t)Radar_Mode ,Radar2_ok );
+	if(Radar2_ok){
 		Radar2_ok = false;
 		float distance = 0;
 		distance = (float)(buffer[2] + buffer[3]*256)/100;
-		printf("distance2=%f \n",distance);
+//		printf("distance B=%f \n",distance);
 		if(LED_Mode){
-			if((time_10ms%200==0) && (distance<0.6)){
-				LED_1 ^= 1;
-				LED_2 ^= 1;
-				LED_3 ^= 0;
+//			printf("mode A \n\n");
+			if((distance>0.3 && distance<0.9) || (distance<=0.6)){
+				if(0.9<0.6){
+					LED_1 = 1; LED_2 = 1; LED_3 = 0;
+//					printf("distance0.3 - 0.9\n\n");
+				}else{
+					if((time_1ms%1000==0) && (distance<=0.6f)){
+						LED_1 ^= 1; LED_2 ^= 1; LED_3 = 0;
+//						printf("distance<0.6 time=%d\n\n",time_1ms);
+					}
+					else if((distance <= 0.9f)){
+						LED_1 = 1; LED_2 = 1; LED_3 = 0;
+//						printf("distance<0.9\n\n");
+					}
+				}
 			}
-			else if(distance>0.3 && distance<0.9){
-				LED_1 = 1;
-				LED_2 = 1;
-				LED_3 = 0;
-			}
-			if(distance>0.6){
-				LED_1 = 0;
-				LED_2 = 0;
-				LED_3 = 1;
-			}
+			else if((distance > 0.6)){
+				LED_1 = 0; LED_2 = 0; LED_3 = 1;
+//				printf("distance>0.6\n\n");
+			}				
 		}
 		else{ //control B
-			if(distance <= 0.3){
-				LED_1 = 0;
-				LED_2 = 1;
-				LED_3 = 0;
-			}
-			else if(distance>0.3 && distance<=0.6){
-				LED_2 = 0;
-				LED_3 = 0;
-				if((time_10ms%100==0) && (distance<0.6)){
-					LED_1 ^= 1;
+			printf("mode B \n\n");
+			
+			if(distance <= 1.5){
+//				printf("distance B=%f \n",distance);
+				if((distance <= 0.3f)){
+					LED_1 = 0; LED_2 = 1; LED_3 = 0;
+//					printf("distance<0.3\n\n");
 				}
-			}
-			else if(distance>0.6 && distance<=0.9){
-				LED_2 = 0;
-				LED_3 = 0;
-				if((time_10ms%100==0) && (distance<0.6)){
-					LED_1 ^= 1;
+				else if((distance <= 0.6f)){
+					if(time_1ms%200 == 0){
+						LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
+//					printf("distance<0.6\n\n");
+					}
 				}
-			}
-			else if(distance>0.9 && distance<=1.5){
-				LED_2 = 0;
-				LED_3 = 0;
-				if((time_10ms%50==0) && (distance<0.6)){
-					LED_1 ^= 1;
+				else if(distance <= 0.9f){
+					if(time_1ms%500 == 0){
+						LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
+//					printf("distance<0.9\n\n");
+					}
+				}
+				else if(distance<= 1.5f){
+					if(time_1ms%1000 == 0){
+						LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
+//						printf("distance<1.5\n\n");
+					}
 				}
 			}
 			else{
-				LED_1 = 0;
-				LED_2 = 0;
-				LED_3 = 1;
+				LED_1=0; LED_2=0; LED_3=1;
+//				printf("distance>1.5\n\n");
 			}
 		}
 	}
@@ -400,7 +434,7 @@ void Radar2_hand(void)
 
 
 
-void Radar1_hand(void)
+void RadarA_hand(void)
 {
 	uint8_t c;
 	uint8_t buffer[9];
@@ -413,17 +447,17 @@ void Radar1_hand(void)
 		switch(c)
 		{
 			case FIX1:
-				if(Radar1_Rec_Buf[i] == 0x59){
+				if(Radar2_Rec_Buf[i] == 0x59){
 					state1 = FIX2;
-					buffer[0] = Radar1_Rec_Buf[i];
+					buffer[0] = Radar2_Rec_Buf[i];
 				}
 				else{
 					state1 = FIX1;
 				}
 				break;
 			case FIX2:
-				if(Radar1_Rec_Buf[i] == 0x59){
-					buffer[1] = Radar1_Rec_Buf[i];
+				if(Radar2_Rec_Buf[i] == 0x59){
+					buffer[1] = Radar2_Rec_Buf[i];
 					state1 = DIS_L;
 				}
 				else{
@@ -431,33 +465,33 @@ void Radar1_hand(void)
 				}
 				break;
 			case DIS_L:
-				buffer[2] = Radar1_Rec_Buf[i];
+				buffer[2] = Radar2_Rec_Buf[i];
 				state1 = DIS_H;
 				break;
 				
 			case DIS_H:
-				buffer[3] = Radar1_Rec_Buf[i];
+				buffer[3] = Radar2_Rec_Buf[i];
 				state1 = STR_1;
 				break;
 			case STR_1:
-				buffer[4] = Radar1_Rec_Buf[i];
+				buffer[4] = Radar2_Rec_Buf[i];
 				state1 = STR_2;
 				break;
 			case STR_2:
-				buffer[5] = Radar1_Rec_Buf[i];
+				buffer[5] = Radar2_Rec_Buf[i];
 				state1 = MODE;
 				break;
 			case MODE:
-				buffer[6] = Radar1_Rec_Buf[i];
+				buffer[6] = Radar2_Rec_Buf[i];
 				state1 = SAVE;
 				break;
 			case SAVE:
-				buffer[7] = Radar1_Rec_Buf[i];
+				buffer[7] = Radar2_Rec_Buf[i];
 				state1 = ChceckSum;
 				break;
 			case ChceckSum:
-//				printf("buf=%02x crc=%02x\n",Radar1_Rec_Buf[i],check_sum(buffer));
-				if( Radar1_Rec_Buf[i] == check_sum(buffer)){
+//				printf("buf=%02x crc=%02x\n",Radar2_Rec_Buf[i],check_sum(buffer));
+				if( Radar2_Rec_Buf[i] == check_sum(buffer)){
 					Radar1_ok = true;
 //					printf("Radar1_ok=%d\n",Radar1_ok);
 				}
@@ -466,67 +500,71 @@ void Radar1_hand(void)
 			default:
 				break;
 		}
-//		if(Radar1_ok){
-//			state1 = FIX1;
-//			printf("Radar1_ok\n");
-//			return;
-//		}
 	}
 	state1 = FIX1;
 	
 //control A
-//	printf("Radar_Mode=%d ok=%d\n",(uint16_t)Radar_Mode ,Radar1_ok );
-	if(Radar1_ok==true && (Radar_Mode == 1)){
+	if(Radar1_ok==true){
 //		printf("dis jisuan \n");
 		float distance = 0;
 		Radar1_ok = false;
 		distance = (float)(buffer[2] + buffer[3]*256)/100;
-		
-//		printf("distance1=%f \n",distance);
-		if(LED_Mode){
-			if((time_10ms%200==0) && (distance<3.0)){
-				LED_1 ^= 1;
-				LED_2 ^= 1;
-				LED_3 = 0;
+//		printf("distance A=%f \n",distance);
+		if(Control_Mode && LED_Mode){
+			if(distance <= 0.6f){
+				LED_1=1; LED_2=1; LED_3=0; ExCon1=0; ExCon2=1;
+				printf("distance < 0.6\n\n");
 			}
-			else if(distance>0.3 && distance<0.9){
-				LED_1 = 1;
-				LED_2 = 1;
-				LED_3 = 0;
-			}
-			if(distance>3.0){
-				LED_1 = 0;
-				LED_2 = 0;
-				LED_3 = 1;
+			else if(distance <= 3.0f){
+				if((time_1ms%1000) == 0){
+					LED_1 ^= 1; LED_2 ^= 1; LED_3=0; ExCon1=1; ExCon2=0;
+					printf("time=%d \n",time_1ms);
+				}
 			}
 		}
-		else{ //control B
-			if(distance <= 0.3){
-				LED_1 = 0;
-				LED_2 = 1;
+		else{
+			if(LED_Mode){
+				if((distance>0.3 && distance<0.9) || (distance < 3.0)){
+					if( distance <= 0.9){
+						LED_1 = 1; LED_2 = 1; LED_3 = 0;
+						printf("distance0.3 - 0.9\n\n");
+					}
+					else{
+						if((time_1ms%1000==0) && (distance<3.0)){
+							LED_1 ^= 1; LED_2 ^= 1; LED_3 = 0;
+							printf("distance<3.0 time=%d\n\n",time_1ms);
+						}
+					}
+				}	
 			}
-			else if(distance>0.3 && distance<=0.6){
-				LED_2 = 0;
-				if((time_10ms%200==0) && (distance<0.6)){
-					LED_1 ^= 1;
+			else{ //control B
+				if(distance < 1.5){
+					if((distance < 0.3f)){
+						LED_1 = 0; LED_2 = 1; LED_3 = 0;
+						printf("distance <0.3\n\n");
+					}
+					else if((distance < 0.6f)){
+						if(time_1ms%200 == 0){
+							LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
+							printf("distance <0.6\n\n");
+						}
+					}
+					else if(distance < 0.9f){
+						if(time_1ms%500 == 0){
+							LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
+							printf("distance <0.9\n\n");
+						}
+					}
+					else if(distance< 1.5f){
+						if(time_1ms%1000 == 0){
+							LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
+							printf("distance < 1.5\n\n");
+						}
+					}
 				}
-			}
-			else if(distance>0.6 && distance<=0.9){
-				LED_2 = 0;
-				if((time_10ms%50==0) && (distance<0.6)){
-					LED_1 ^= 1;
+				else{
+					LED_1=0; LED_2=0; LED_3=1;
 				}
-			}
-			else if(distance>0.9 && distance<=1.5){
-				LED_2 = 0;
-				if((time_10ms%100==0) && (distance<0.6)){
-					LED_1 ^= 1;
-				}
-			}
-			else{
-				LED_1 = 0;
-				LED_2 = 0;
-				LED_3 = 1;
 			}
 		}
 	}
@@ -536,6 +574,7 @@ void Radar1_hand(void)
 void Radar_Data_Set(uint8_t *cmd)
 {
 	if((cmd[0]==0xA5) && (cmd[1]==0x5A)){
+		printf("cmd=%02x\n",cmd[2]);
 		switch(cmd[2])
 		{	
 			case RADAR1_A_STEP12_DIS:

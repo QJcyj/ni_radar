@@ -16,24 +16,24 @@
 #define FLASH_SAVE_ADDR  0X0800F000		//数据保存地址   0x08000000 +  设定区   60K处  F000
 
 #define	RADAR1_A_STEP12_DIS	0x00		//雷达1 模式A 步骤1 2 数据存储地址
-#define	RADAR1_A_STEP3_BIG	0x04		//雷达1 模式A 步骤3 大距离数据存储地址
-#define	RADAR1_A_STEP3_MIN	0x08		//雷达1 模式A 步骤3 小距离数据存储地址
+#define	RADAR1_A_STEP3_BIG	0x02		//雷达1 模式A 步骤3 大距离数据存储地址
+#define	RADAR1_A_STEP3_MIN	0x04		//雷达1 模式A 步骤3 小距离数据存储地址
 
-#define	RADAR1_B_STEP12_DIS	0x0C
-#define	RADAR1_B_STEP3_DIS	0x10
-#define	RADAR1_B_STEP4_DIS	0x14
-#define	RADAR1_B_STEP5_DIS	0x18
+#define	RADAR1_B_STEP12_DIS	0x06
+#define	RADAR1_B_STEP3_DIS	0x08
+#define	RADAR1_B_STEP4_DIS	0x0A
+#define	RADAR1_B_STEP5_DIS	0x0C
 
 
-#define	RADAR2_A_STEP12_DIS	0x1C
-#define	RADAR2_A_STEP3_BIG	0x20
-#define	RADAR2_A_STEP3_MIN	0x24
+#define	RADAR2_A_STEP12_DIS	0x0E
+#define	RADAR2_A_STEP3_BIG	0x10
+#define	RADAR2_A_STEP3_MIN	0x12
 
-#define	RADAR2_B_STEP12_DIS	0x28
-#define	RADAR2_B_STEP3_DIS	0x2C
-#define	RADAR2_B_STEP4_DIS	0x30
-#define	RADAR2_B_STEP5_DIS	0x34
-
+#define	RADAR2_B_STEP12_DIS	0x14
+#define	RADAR2_B_STEP3_DIS	0x16
+#define	RADAR2_B_STEP4_DIS	0x18
+#define	RADAR2_B_STEP5_DIS	0x1A
+#define LOAD_PARAM			0x1E
 
 
 void STMFLASH_Unlock(void);					  //FLASH解锁
