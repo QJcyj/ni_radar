@@ -598,37 +598,35 @@ void RadarA_hand(void)
 		if(Control_Mode && LED_Mode){
 			if(distance <= 0.6f){
 				LED_1=1; LED_2=1; LED_3=0; ExCon1=0; ExCon2=1;
-//				printf("distance < 0.6\n\n");
 			}
 			else if(distance <= 3.0f){
 				if(hrt_time(NOW3_R) > _100ms*10){
 					get_time(&NOW3_R);
 					LED_1 ^= 1; LED_2 ^= 1; LED_3=0; ExCon1=1; ExCon2=0;
-//					printf("time=%d \n",time_100ms);
 				}
 			}
 			else if(distance > 3.0f){
-				LED_1 = 0; LED_2 = 0; LED_3=0;
+				LED_1 = 0; LED_2 = 0; LED_3=1; ExCon1=0; ExCon2=0;
 			}
 		}
 		else{
 			if(LED_Mode){
-//				printf("MODE A\n");
 				if(((distance > (float)Con1A_3_min) 
 					&& (distance<=(float)Con1A_3_max)) 
 					|| (distance <= (float)Con1A_12)){
 					if( distance <= (float)Con1A_3_max){
-						LED_1 = 1; LED_2 = 1; LED_3 = 0;
-//						printf("distance0.3 - 0.9\n\n");
+						LED_1 = 1; LED_2 = 1; LED_3 = 0; ExCon1=0; ExCon2=1;
 					}
 					else{
 						if((hrt_time(NOW1_R_A_2) > _100ms*10) && (distance<=(float)Con1A_3_min)){
 							get_time(&NOW1_R_A_2);
-							LED_1 ^= 1; LED_2 ^= 1; LED_3 = 0;
-//							printf("distance<3.0 time=%d\n\n",time_100ms);
+							LED_1 ^= 1; LED_2 ^= 1; LED_3 = 0; ExCon1=1; ExCon2=0;
 						}
 					}
-				}	
+				}
+				else if(distance > (float)Con1A_12){
+					LED_1 = 0; LED_2 = 0; LED_3 = 1; ExCon1=0; ExCon2=0;
+				}					
 			}
 			else{ //control B
 //				printf("MODE B  %3.2f\n",Con1B_12);
