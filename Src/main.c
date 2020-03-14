@@ -87,6 +87,18 @@ float Con2B_3;
 float Con2B_4;	
 float Con2B_5;	
 
+uint32_t NOW1_R_A_2 = 0;
+uint32_t NOW1_R_B_2 = 0;
+uint32_t NOW1_R_B_3 = 0;
+uint32_t NOW1_R_B_4 = 0;
+
+uint32_t NOW2_R_A_2 = 0;
+uint32_t NOW2_R_B_2 = 0;
+uint32_t NOW2_R_B_3 = 0;
+uint32_t NOW2_R_B_4 = 0;
+
+uint32_t NOW3_R = 0;
+
 uint8_t CMD_Buf[5]={0,0,0,0,0};
 #define Cmd_size	5
 
@@ -137,7 +149,7 @@ extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 extern TIM_HandleTypeDef htim2;
-uint16_t time_1ms = 0;
+uint32_t time_100ms = 0;
 
 bool Radar1_ok = false;
 bool Radar2_ok = false;
@@ -151,6 +163,9 @@ void RadarB_hand(void);
 void RadarA_hand(void);
 void Radar_Data_Set(uint8_t *cmd);
 void ParamLoad(void);
+void get_time(uint32_t *time);
+uint32_t hrt_time(uint32_t time);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -242,7 +257,7 @@ int main(void)
 	else{
 		RadarB_hand();
 	}
-	if((time_1ms%2000) == 0)
+	if((time_100ms%2000) == 0)
 	{
 		STMFLASH_Read(FLASH_SAVE_ADDR,(uint16_t*)param,SIZE);
 		Con1A_12	=	((float)(param[0]*256+param[1])/100);
@@ -262,7 +277,7 @@ int main(void)
 		Con2B_5		=	((float)(param[26]*256+param[27])/100);
 	}
 
-	if((time_1ms%300) == 0)
+	if((time_100ms%300) == 0)
 	{
 		HAL_UART_Transmit_DMA(&huart1, param, SIZE);
 	}
@@ -327,9 +342,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if(htim->Instance == htim2.Instance)
 	{
-		time_1ms ++;
-		if(time_1ms >= 60000){
-			time_1ms = 0;
+		time_100ms ++;
+		if(time_100ms >= 0xFFFFFFFE){
+			time_100ms = 0;
+			NOW1_R_A_2 = 0;
+			NOW1_R_B_2 = 0;
+			NOW1_R_B_3 = 0;
+			NOW1_R_B_4 = 0;
+
+			NOW2_R_A_2 = 0;
+			NOW2_R_B_2 = 0;
+			NOW2_R_B_3 = 0;
+			NOW2_R_B_4 = 0;
+
+			NOW3_R = 0;
 		}
 	}
 
@@ -434,9 +460,9 @@ void RadarB_hand(void)
 					LED_1 = 1; LED_2 = 1; LED_3 = 0;
 //					printf("distance0.3 - 0.9\n\n");
 				}else{
-					if((time_1ms%1000==0) && (distance<=(float)Con2A_12)){
+					if((time_100ms%1000==0) && (distance<=(float)Con2A_12)){
 						LED_1 ^= 1; LED_2 ^= 1; LED_3 = 0;
-//						printf("distance<0.6 time=%d\n\n",time_1ms);
+//						printf("distance<0.6 time=%d\n\n",time_100ms);
 					}
 					else if(distance <= (float)Con2A_3_max){
 						LED_1 = 1; LED_2 = 1; LED_3 = 0;
@@ -459,19 +485,19 @@ void RadarB_hand(void)
 //					printf("distance<0.3\n\n");
 				}
 				else if(distance <= (float)Con2B_4){
-					if(time_1ms%200 == 0){
+					if(time_100ms%200 == 0){
 						LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
 //					printf("distance<0.6\n\n");
 					}
 				}
 				else if(distance <= (float)Con2B_3){
-					if(time_1ms%500 == 0){
+					if(time_100ms%500 == 0){
 						LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
 //					printf("distance<0.9\n\n");
 					}
 				}
 				else if(distance<= (float)Con2B_12){
-					if(time_1ms%1000 == 0){
+					if(time_100ms%1000 == 0){
 						LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
 //						printf("distance<1.5\n\n");
 					}
@@ -569,10 +595,13 @@ void RadarA_hand(void)
 //				printf("distance < 0.6\n\n");
 			}
 			else if(distance <= 3.0f){
-				if((time_1ms%1000) == 0){
+				if((time_100ms%1000) == 0){
 					LED_1 ^= 1; LED_2 ^= 1; LED_3=0; ExCon1=1; ExCon2=0;
-//					printf("time=%d \n",time_1ms);
+//					printf("time=%d \n",time_100ms);
 				}
+			}
+			else if(distance > 3.0f){
+				LED_1 = 0; LED_2 = 0; LED_3=0;
 			}
 		}
 		else{
@@ -586,9 +615,9 @@ void RadarA_hand(void)
 //						printf("distance0.3 - 0.9\n\n");
 					}
 					else{
-						if((time_1ms%1000==0) && (distance<=(float)Con1A_3_min)){
+						if((time_100ms%1000==0) && (distance<=(float)Con1A_3_min)){
 							LED_1 ^= 1; LED_2 ^= 1; LED_3 = 0;
-//							printf("distance<3.0 time=%d\n\n",time_1ms);
+//							printf("distance<3.0 time=%d\n\n",time_100ms);
 						}
 					}
 				}	
@@ -601,21 +630,21 @@ void RadarA_hand(void)
 //						printf("distance <0.3\n\n");
 					}
 					else if(distance < (float)Con1B_4){
-						if(time_1ms%200 == 0){
+						if(time_100ms%200 == 0){
 							LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
 //							printf("distance <0.6\n\n");
 						}
 					}
 					else if(distance <= (float)Con1B_3){
-						if(time_1ms%500 == 0){
+						if(time_100ms%500 == 0){
 							LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
 //							printf("distance <0.9\n\n");
 						}
 					}
 					else if(distance <= (float)Con1B_12){
-						if(time_1ms%1000 == 0){
+						if(time_100ms%1000 == 0){
 							LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
-//							printf("time_1ms=%d\n",time_1ms);
+//							printf("time_100ms=%d\n",time_100ms);
 //							printf("distance < 1.5\n\n");
 						}
 					}
@@ -704,6 +733,16 @@ void ParamLoad(void)
 	
 }
 
+
+void get_time(uint32_t *time)
+{
+	*time = time_100ms;
+}
+
+uint32_t hrt_time(uint32_t time)
+{
+	return (time_100ms - time);
+}
 /* USER CODE END 4 */
 
 /**
