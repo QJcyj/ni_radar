@@ -119,6 +119,15 @@ uint8_t	Radar2_Rec_Buf[27];
 #define ExCon1			PBout(4)
 #define ExCon2			PBout(5)
 
+#define One_Ctrl_Mode	PBin(2)
+
+#define Out_Ger_led		PAout(15)
+#define Out_Yellow_led	PBout(4)
+#define Out_Red_led		PBout(3)
+
+#define In_Red_led		PBout(14)
+#define In_Ger_led		PBout(13)
+
 #define _100ms			1U
 
 /* USER CODE END PD */
@@ -668,6 +677,150 @@ void RadarA_hand(void)
 	
 }
 
+
+void One_Radar_hand()
+{
+	uint8_t c;
+	uint8_t buffer[9];
+	Radar1_ok = false;
+	for(uint8_t i=0;i<9;i++)
+	{
+		c = state1;
+		switch(c)
+		{
+			case FIX1:
+				if(Radar2_Rec_Buf[i] == 0x59){
+					state1 = FIX2;
+					buffer[0] = Radar2_Rec_Buf[i];
+				}
+				else{
+					state1 = FIX1;
+				}
+				break;
+			case FIX2:
+				if(Radar2_Rec_Buf[i] == 0x59){
+					buffer[1] = Radar2_Rec_Buf[i];
+					state1 = DIS_L;
+				}
+				else{
+					state1 = FIX1;
+				}
+				break;
+			case DIS_L:
+				buffer[2] = Radar2_Rec_Buf[i];
+				state1 = DIS_H;
+				break;
+				
+			case DIS_H:
+				buffer[3] = Radar2_Rec_Buf[i];
+				state1 = STR_1;
+				break;
+			case STR_1:
+				buffer[4] = Radar2_Rec_Buf[i];
+				state1 = STR_2;
+				break;
+			case STR_2:
+				buffer[5] = Radar2_Rec_Buf[i];
+				state1 = MODE;
+				break;
+			case MODE:
+				buffer[6] = Radar2_Rec_Buf[i];
+				state1 = SAVE;
+				break;
+			case SAVE:
+				buffer[7] = Radar2_Rec_Buf[i];
+				state1 = ChceckSum;
+				break;
+			case ChceckSum:
+//				printf("buf=%02x crc=%02x\n",Radar2_Rec_Buf[i],check_sum(buffer));
+				if( Radar2_Rec_Buf[i] == check_sum(buffer)){
+					Radar1_ok = true;
+//					printf("Radar1_ok=%d\n",Radar1_ok);
+				}
+//				printf("Radar1 sum ok\n");
+				break;
+			default:
+				break;
+		}
+	}
+	state1 = FIX1;
+	if(Radar1_ok==true){
+//		printf("dis jisuan \n");
+		float distance = 0;
+		Radar1_ok = false;
+		distance = (float)(buffer[2] + buffer[3]*256)/100;
+//		printf("distance A=%f \n",distance);
+		if(Control_Mode && LED_Mode){
+			if(distance <= 0.6f){
+				LED_1=1; LED_2=1; LED_3=0; ExCon1=0; ExCon2=1;
+			}
+			else if(distance <= 3.0f){
+				if(hrt_time(NOW3_R) > _100ms*10){
+					get_time(&NOW3_R);
+					LED_1 ^= 1; LED_2 ^= 1; LED_3=0; ExCon1=1; ExCon2=0;
+				}
+			}
+			else if(distance > 3.0f){
+				LED_1 = 0; LED_2 = 0; LED_3=1; ExCon1=0; ExCon2=0;
+			}
+		}
+		else{
+			if(LED_Mode){
+				if(((distance > (float)Con1A_3_min) 
+					&& (distance<=(float)Con1A_3_max)) 
+					|| (distance <= (float)Con1A_12)){
+					if( distance <= (float)Con1A_3_max){
+						LED_1 = 1; LED_2 = 1; LED_3 = 0; ExCon1=0; ExCon2=1;
+					}
+					else{
+						if((hrt_time(NOW1_R_A_2) > _100ms*10) && (distance<=(float)Con1A_3_min)){
+							get_time(&NOW1_R_A_2);
+							LED_1 ^= 1; LED_2 ^= 1; LED_3 = 0; ExCon1=1; ExCon2=0;
+						}
+					}
+				}
+				else if(distance > (float)Con1A_12){
+					LED_1 = 0; LED_2 = 0; LED_3 = 1; ExCon1=0; ExCon2=0;
+				}					
+			}
+			else{ //control B
+//				printf("MODE B  %3.2f\n",Con1B_12);
+				if(distance <= (float)Con1B_12){
+					if(distance <= (float)Con1B_5){
+						LED_1 = 0; LED_2 = 1; LED_3 = 0;
+//						printf("distance <0.3\n\n");
+					}
+					else if(distance < (float)Con1B_4){
+						if(hrt_time(NOW1_R_B_4) > _100ms*2){
+							get_time(&NOW1_R_B_4);
+							LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
+//							printf("distance <0.6\n\n");
+						}
+					}
+					else if(distance <= (float)Con1B_3){
+						if(hrt_time(NOW1_R_B_3) > _100ms*5){
+							get_time(&NOW1_R_B_3);
+							LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
+//							printf("distance <0.9\n\n");
+						}
+					}
+					else if(distance <= (float)Con1B_12){
+						if(hrt_time(NOW1_R_B_2) > _100ms*10){
+							get_time(&NOW1_R_B_2);
+							LED_1 ^= 1; LED_2 = 0; LED_3 = 0;
+//							printf("time_100ms=%d\n",time_100ms);
+//							printf("distance < 1.5\n\n");
+						}
+					}
+				}
+				else{
+//					printf("distance > 1.5\n\n");
+					LED_1=0; LED_2=0; LED_3=1;
+				}
+			}
+		}
+	}
+}
 void Radar_Data_Set(uint8_t *cmd)
 {
 	if((cmd[0]==0xA5) && (cmd[1]==0x5A)){
