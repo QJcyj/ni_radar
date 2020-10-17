@@ -123,9 +123,9 @@ uint8_t	Radar2_Rec_Buf[27];
 
 #define Out_Ger_led		PAout(15)
 #define Out_Yellow_led	PBout(4)
-#define Out_Red_led		PBout(3)
+#define Out_Red_led		PBout(14)
 
-#define In_Red_led		PBout(14)
+#define In_Red_led		PBout(3)
 #define In_Ger_led		PBout(13)
 
 #define _100ms			1U
@@ -172,6 +172,7 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void RadarB_hand(void);
 void RadarA_hand(void);
+void One_Radar_hand(void);
 void Radar_Data_Set(uint8_t *cmd);
 void ParamLoad(void);
 void get_time(uint32_t *time);
@@ -262,12 +263,13 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	if(!Radar_Flag){
-		RadarA_hand();
-	}
-	else{
-		RadarB_hand();
-	}
+//	if(!Radar_Flag){
+//		RadarA_hand();
+//	}
+//	else{
+//		RadarB_hand();
+//	}
+	 One_Radar_hand();
 	if((time_100ms%20) == 0)
 	{
 		STMFLASH_Read(FLASH_SAVE_ADDR,(uint16_t*)param,SIZE);
@@ -290,7 +292,7 @@ int main(void)
 
 	if((time_100ms%3) == 0)
 	{
-		HAL_UART_Transmit_DMA(&huart1, param, SIZE);
+//		HAL_UART_Transmit_DMA(&huart1, param, SIZE);
 	}
   }
   /* USER CODE END 3 */
@@ -392,7 +394,7 @@ void RadarB_hand(void)
 	{
 		c = state2;
 //		printf("in to radar2\n");
-//		printf(" %02x",Radar2_Rec_Buf[i]);
+//		printf(" %02x",Radar1_Rec_Buf[i]);
 		switch(c)
 		{
 			case FIX1:
@@ -678,7 +680,7 @@ void RadarA_hand(void)
 }
 
 
-void One_Radar_hand()
+void One_Radar_hand(void)
 {
 	uint8_t c;
 	uint8_t buffer[9];
@@ -764,18 +766,7 @@ void One_Radar_hand()
 			}
 		}
 		else{
-			if(distance <= 0.31f){
-				Out_Ger_led=1; Out_Yellow_led=0; Out_Red_led=0; In_Red_led=0; In_Ger_led=1;
-			}
-			else if((distance > 0.31f) && (distance < 0.9f)){
-				if(hrt_time(NOW3_R) > _100ms*10){
-					get_time(&NOW3_R);
-					Out_Ger_led=0; Out_Yellow_led=1; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
-				}
-			}
-			else{
-				Out_Ger_led=1; Out_Yellow_led=0; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
-			}
+			Out_Ger_led=0; Out_Yellow_led=0; Out_Red_led=1; In_Red_led=0; In_Ger_led=1;
 		}
 	}
 }
