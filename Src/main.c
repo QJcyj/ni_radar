@@ -120,6 +120,10 @@ uint8_t	Radar2_Rec_Buf[27];
 #define ExCon2			PBout(5)
 
 #define One_Ctrl_Mode	PBin(2)	//  PIN 20
+#define One_Ctrl_Mode2	PAin(4)	//  PIN 14
+#define One_Ctrl_Mode3	PAin(5)	//  PIN 15
+#define One_Ctrl_Mode4	PAin(6)	//  PIN 16
+#define One_Ctrl_Mode5	PAin(7)	//  PIN 17
 													//»§Íâ
 #define Out_Ger_led		PAout(15)	// PIN 38   	 ÂÌµÆ
 #define Out_Yellow_led	PBout(4)	// PIN 40		 çúçê
@@ -749,7 +753,7 @@ void One_Radar_hand(void)
 	state1 = FIX1;
 	
 	if(Radar1_ok==false){
-		if(One_Ctrl_Mode){
+		if(One_Ctrl_Mode4){
 			Out_Ger_led=1; Out_Yellow_led=0; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
 		}
 		else{
@@ -761,7 +765,7 @@ void One_Radar_hand(void)
 		Radar1_ok = false;
 		distance = (float)(buffer[2] + buffer[3]*256)/100;
 //		printf("distance A=%f \n",distance);
-		if(One_Ctrl_Mode){
+		if(One_Ctrl_Mode4){
 			if(distance <= 0.31f){
 				Out_Ger_led=0; Out_Yellow_led=1; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
 			}
