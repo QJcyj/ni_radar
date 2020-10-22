@@ -119,14 +119,14 @@ uint8_t	Radar2_Rec_Buf[27];
 #define ExCon1			PBout(4)
 #define ExCon2			PBout(5)
 
-#define One_Ctrl_Mode	PBin(2)
-
-#define Out_Ger_led		PAout(15)
-#define Out_Yellow_led	PBout(4)
-#define Out_Red_led		PBout(14)
-
-#define In_Red_led		PBout(3)
-#define In_Ger_led		PBout(13)
+#define One_Ctrl_Mode	PBin(2)	//  PIN 20
+													//»§Íâ
+#define Out_Ger_led		PAout(15)	// PIN 38   	 ÂÌµÆ
+#define Out_Yellow_led	PBout(4)	// PIN 40		 çúçê
+#define Out_Red_led		PBout(3)	// PIN 39		 ºìµÆ
+															//»§ÄÚ
+#define In_Red_led		PBout(14)	// PIN 27		 ºìµÆ
+#define In_Ger_led		PBout(13)	// PIN 26		 ÂÌµÆ
 
 #define _100ms			1U
 
@@ -223,35 +223,35 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   delay_init(72);
-  delay_ms(1000);
+  delay_ms(500);
   HAL_TIM_Base_Start_IT(&htim2);
 	HAL_UART_Receive_DMA(&huart1,CMD_Buf,Cmd_size);
 	HAL_UART_Receive_DMA(&huart2,Radar1_Rec_Buf,Radar1_size);
 	HAL_UART_Receive_DMA(&huart3,Radar2_Rec_Buf,Radar2_size);
-	uint8_t start = 0;
-	start = STMFLASH_ReadHalfWord(FLASH_SAVE_ADDR + LOAD_PARAM);
-	printf("start=%d\n",start);
-	if(start==0xFF){
-		STMFLASH_WriteHalfWord(FLASH_SAVE_ADDR + LOAD_PARAM,(uint16_t)(0xAA));
-		STMFLASH_Write(FLASH_SAVE_ADDR,(uint16_t*)param,SIZE);
-		ParamLoad();
-	}
-	
-	Con1A_12	=	((float)(param[0]*256+param[1])/100);
-	Con1A_3_max	=	((float)(param[2]*256+param[3])/100);
-	Con1A_3_min	=	((float)(param[4]*256+param[5])/100);
-	Con1B_12	=	((float)(param[6]*256+param[7])/100);
-	Con1B_3		=	((float)(param[8]*256+param[9])/100);
-	Con1B_4		=	((float)(param[10]*256+param[11])/100);
-	Con1B_5		=	((float)(param[12]*256+param[13])/100);
+//	uint8_t start = 0;
+//	start = STMFLASH_ReadHalfWord(FLASH_SAVE_ADDR + LOAD_PARAM);
+//	printf("start=%d\n",start);
+//	if(start==0xFF){
+//		STMFLASH_WriteHalfWord(FLASH_SAVE_ADDR + LOAD_PARAM,(uint16_t)(0xAA));
+//		STMFLASH_Write(FLASH_SAVE_ADDR,(uint16_t*)param,SIZE);
+//		ParamLoad();
+//	}
+//	
+//	Con1A_12	=	((float)(param[0]*256+param[1])/100);
+//	Con1A_3_max	=	((float)(param[2]*256+param[3])/100);
+//	Con1A_3_min	=	((float)(param[4]*256+param[5])/100);
+//	Con1B_12	=	((float)(param[6]*256+param[7])/100);
+//	Con1B_3		=	((float)(param[8]*256+param[9])/100);
+//	Con1B_4		=	((float)(param[10]*256+param[11])/100);
+//	Con1B_5		=	((float)(param[12]*256+param[13])/100);
 
-	Con2A_12	=	((float)(param[14]*256+param[15])/100);
-	Con2A_3_max =((float)(param[16]*256+param[17])/100);
-	Con2A_3_min	=	((float)(param[18]*256+param[19])/100);
-	Con2B_12	=	((float)(param[20]*256+param[21])/100);
-	Con2B_3		=	((float)(param[22]*256+param[23])/100);
-	Con2B_4		=	((float)(param[24]*256+param[25])/100);
-	Con2B_5		=	((float)(param[26]*256+param[27])/100);
+//	Con2A_12	=	((float)(param[14]*256+param[15])/100);
+//	Con2A_3_max =((float)(param[16]*256+param[17])/100);
+//	Con2A_3_min	=	((float)(param[18]*256+param[19])/100);
+//	Con2B_12	=	((float)(param[20]*256+param[21])/100);
+//	Con2B_3		=	((float)(param[22]*256+param[23])/100);
+//	Con2B_4		=	((float)(param[24]*256+param[25])/100);
+//	Con2B_5		=	((float)(param[26]*256+param[27])/100);
 	
 //	STMFLASH_Read(FLASH_SAVE_ADDR,(uint16_t*)datatemp,SIZE);
   /* USER CODE END 2 */
@@ -270,30 +270,31 @@ int main(void)
 //		RadarB_hand();
 //	}
 	 One_Radar_hand();
-	if((time_100ms%20) == 0)
-	{
-		STMFLASH_Read(FLASH_SAVE_ADDR,(uint16_t*)param,SIZE);
-		Con1A_12	=	((float)(param[0]*256+param[1])/100);
-		Con1A_3_max	=	((float)(param[2]*256+param[3])/100);
-		Con1A_3_min	=	((float)(param[4]*256+param[5])/100);
-		Con1B_12	=	((float)(param[6]*256+param[7])/100);
-		Con1B_3		=	((float)(param[8]*256+param[9])/100);
-		Con1B_4		=	((float)(param[10]*256+param[11])/100);
-		Con1B_5		=	((float)(param[12]*256+param[13])/100);
+	 delay_ms(40); 
+//	if((time_100ms%20) == 0)
+//	{
+//		STMFLASH_Read(FLASH_SAVE_ADDR,(uint16_t*)param,SIZE);
+//		Con1A_12	=	((float)(param[0]*256+param[1])/100);
+//		Con1A_3_max	=	((float)(param[2]*256+param[3])/100);
+//		Con1A_3_min	=	((float)(param[4]*256+param[5])/100);
+//		Con1B_12	=	((float)(param[6]*256+param[7])/100);
+//		Con1B_3		=	((float)(param[8]*256+param[9])/100);
+//		Con1B_4		=	((float)(param[10]*256+param[11])/100);
+//		Con1B_5		=	((float)(param[12]*256+param[13])/100);
 
-		Con2A_12	=	((float)(param[14]*256+param[15])/100);
-		Con2A_3_max =	((float)(param[16]*256+param[17])/100);
-		Con2A_3_min	=	((float)(param[18]*256+param[19])/100);
-		Con2B_12	=	((float)(param[20]*256+param[21])/100);
-		Con2B_3		=	((float)(param[22]*256+param[23])/100);
-		Con2B_4		=	((float)(param[24]*256+param[25])/100);
-		Con2B_5		=	((float)(param[26]*256+param[27])/100);
-	}
+//		Con2A_12	=	((float)(param[14]*256+param[15])/100);
+//		Con2A_3_max =	((float)(param[16]*256+param[17])/100);
+//		Con2A_3_min	=	((float)(param[18]*256+param[19])/100);
+//		Con2B_12	=	((float)(param[20]*256+param[21])/100);
+//		Con2B_3		=	((float)(param[22]*256+param[23])/100);
+//		Con2B_4		=	((float)(param[24]*256+param[25])/100);
+//		Con2B_5		=	((float)(param[26]*256+param[27])/100);
+//	}
 
-	if((time_100ms%3) == 0)
-	{
-//		HAL_UART_Transmit_DMA(&huart1, param, SIZE);
-	}
+//	if((time_100ms%3) == 0)
+//	{
+////		HAL_UART_Transmit_DMA(&huart1, param, SIZE);
+//	}
   }
   /* USER CODE END 3 */
 }
@@ -338,16 +339,16 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if(huart == &huart2){
-		Radar_Flag = true;
-	}
-	if(huart == &huart3){
+//	if(huart == &huart2){
+//		Radar_Flag = true;
+//	}
+//	if(huart == &huart3){
 
-	}
-	if(huart == &huart1){
-//		HAL_UART_Transmit_DMA(&huart1, CMD_Buf, 5);
-		Radar_Data_Set(CMD_Buf);
-	}
+//	}
+//	if(huart == &huart1){
+////		HAL_UART_Transmit_DMA(&huart1, CMD_Buf, 5);
+//		Radar_Data_Set(CMD_Buf);
+//	}
 }
 
 
@@ -746,6 +747,15 @@ void One_Radar_hand(void)
 		}
 	}
 	state1 = FIX1;
+	
+	if(Radar1_ok==false){
+		if(One_Ctrl_Mode){
+			Out_Ger_led=1; Out_Yellow_led=0; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
+		}
+		else{
+			Out_Ger_led=0; Out_Yellow_led=0; Out_Red_led=1; In_Red_led=0; In_Ger_led=1;
+		}
+	}
 	if(Radar1_ok==true){
 		float distance = 0;
 		Radar1_ok = false;
@@ -756,19 +766,17 @@ void One_Radar_hand(void)
 				Out_Ger_led=0; Out_Yellow_led=1; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
 			}
 			else if((distance > 0.31f) && (distance < 0.9f)){
-				if(hrt_time(NOW3_R) > _100ms*10){
+				if(hrt_time(NOW3_R) > _100ms*6){
 					get_time(&NOW3_R);
-					Out_Ger_led=0; Out_Yellow_led=1; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
+					Out_Ger_led=0; Out_Yellow_led^=1; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
 				}
-			}
-			else{
-				Out_Ger_led=1; Out_Yellow_led=0; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
 			}
 		}
 		else{
 			Out_Ger_led=0; Out_Yellow_led=0; Out_Red_led=1; In_Red_led=0; In_Ger_led=1;
 		}
 	}
+
 }
 void Radar_Data_Set(uint8_t *cmd)
 {
