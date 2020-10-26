@@ -374,7 +374,8 @@ int fputc(int c, FILE *stream)    //重写fputc函数
     huart1是工具生成代码定义的UART1结构体，
     如果以后要使用其他串口打印，只需要把这个结构体改成其他UART结构体。
 */
-    HAL_UART_Transmit(&huart1, (unsigned char *)&c, 1, 1000);   
+    HAL_UART_Transmit(&huart1, (unsigned char *)&c, 1, 1000);
+//	while(__HAL_UART_GET_FLAG(&huart1,UART_FLAG_TC)!=HAL_OK);	
     return 1;
 }
 /* USER CODE END 1 */

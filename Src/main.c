@@ -111,6 +111,9 @@ uint8_t	Radar1_Rec_Buf[27];
 uint8_t	Radar2_Rec_Buf[27];
 #define Radar2_size	27
 
+uint8_t radar_err = 0;
+float last_dis = 0.0f;
+
 #define Control_Mode 	PBin(0)
 #define LED_Mode   		PBin(15)
 #define LED_1 	   		PAout(15)
@@ -234,7 +237,7 @@ int main(void)
 	HAL_UART_Receive_DMA(&huart3,Radar2_Rec_Buf,Radar2_size);
 //	uint8_t start = 0;
 //	start = STMFLASH_ReadHalfWord(FLASH_SAVE_ADDR + LOAD_PARAM);
-//	printf("start=%d\n",start);
+//	printf("start runing\n");
 //	if(start==0xFF){
 //		STMFLASH_WriteHalfWord(FLASH_SAVE_ADDR + LOAD_PARAM,(uint16_t)(0xAA));
 //		STMFLASH_Write(FLASH_SAVE_ADDR,(uint16_t*)param,SIZE);
@@ -274,7 +277,7 @@ int main(void)
 //		RadarB_hand();
 //	}
 	 One_Radar_hand();
-	 delay_ms(40); 
+	 delay_ms(80); 
 //	if((time_100ms%20) == 0)
 //	{
 //		STMFLASH_Read(FLASH_SAVE_ADDR,(uint16_t*)param,SIZE);
@@ -681,6 +684,7 @@ void RadarA_hand(void)
 			}
 		}
 	}
+//	mepyset Radar2_Rec_Buf
 	
 }
 
@@ -750,34 +754,59 @@ void One_Radar_hand(void)
 				break;
 		}
 	}
+	if(!Radar1_ok){
+		radar_err++;
+	}
 	state1 = FIX1;
 	
-	if(Radar1_ok==false){
-		if(One_Ctrl_Mode4){
+	if(Radar1_ok==false && (radar_err>1)){
+		printf("sitch:%d\n",HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_2));
+		if(radar_err>100){
+			radar_err = 2;
+		}
+		if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_2)){
 			Out_Ger_led=1; Out_Yellow_led=0; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
+			printf("out ger in red\n");
 		}
 		else{
 			Out_Ger_led=0; Out_Yellow_led=0; Out_Red_led=1; In_Red_led=0; In_Ger_led=1;
+			printf("out yellow in red\n");
 		}
 	}
 	if(Radar1_ok==true){
 		float distance = 0;
+		
 		Radar1_ok = false;
-		distance = (float)(buffer[2] + buffer[3]*256)/100;
-//		printf("distance A=%f \n",distance);
-		if(One_Ctrl_Mode4){
+		if(radar_err!=0){
+			radar_err = 0;
+			distance = last_dis;
+		}
+		else{
+			distance = (float)(buffer[2] + buffer[3]*256)/100;
+			last_dis = distance;
+		}
+		
+		printf("distance=%f sitch:%d\n",distance,HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_2));
+		if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_2)){
 			if(distance <= 0.31f){
 				Out_Ger_led=0; Out_Yellow_led=1; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
+				printf("ok < 0.3 \n");
 			}
 			else if((distance > 0.31f) && (distance < 0.9f)){
 				if(hrt_time(NOW3_R) > _100ms*6){
 					get_time(&NOW3_R);
 					Out_Ger_led=0; Out_Yellow_led^=1; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
 				}
+				printf("ok  0.3~0.9 \n");
+			}
+			else{
+				Out_Ger_led=1; Out_Yellow_led=0; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
+				printf("ok  none sitch 1\n");
 			}
 		}
 		else{
 			Out_Ger_led=0; Out_Yellow_led=0; Out_Red_led=1; In_Red_led=0; In_Ger_led=1;
+			printf("ok  none sitch 0\n");
 		}
 	}
 
