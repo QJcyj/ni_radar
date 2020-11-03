@@ -1,0 +1,9 @@
+# 
+# Delete Project Outputs file
+
+*.obj
+*.uvgui.*
+*.lst
+*._i
+*._htm
+MDK-ARM/main_src/

@@ -235,32 +235,7 @@ int main(void)
 	HAL_UART_Receive_DMA(&huart1,CMD_Buf,Cmd_size);
 	HAL_UART_Receive_DMA(&huart2,Radar1_Rec_Buf,Radar1_size);
 	HAL_UART_Receive_DMA(&huart3,Radar2_Rec_Buf,Radar2_size);
-//	uint8_t start = 0;
-//	start = STMFLASH_ReadHalfWord(FLASH_SAVE_ADDR + LOAD_PARAM);
-//	printf("start runing\n");
-//	if(start==0xFF){
-//		STMFLASH_WriteHalfWord(FLASH_SAVE_ADDR + LOAD_PARAM,(uint16_t)(0xAA));
-//		STMFLASH_Write(FLASH_SAVE_ADDR,(uint16_t*)param,SIZE);
-//		ParamLoad();
-//	}
-//	
-//	Con1A_12	=	((float)(param[0]*256+param[1])/100);
-//	Con1A_3_max	=	((float)(param[2]*256+param[3])/100);
-//	Con1A_3_min	=	((float)(param[4]*256+param[5])/100);
-//	Con1B_12	=	((float)(param[6]*256+param[7])/100);
-//	Con1B_3		=	((float)(param[8]*256+param[9])/100);
-//	Con1B_4		=	((float)(param[10]*256+param[11])/100);
-//	Con1B_5		=	((float)(param[12]*256+param[13])/100);
 
-//	Con2A_12	=	((float)(param[14]*256+param[15])/100);
-//	Con2A_3_max =((float)(param[16]*256+param[17])/100);
-//	Con2A_3_min	=	((float)(param[18]*256+param[19])/100);
-//	Con2B_12	=	((float)(param[20]*256+param[21])/100);
-//	Con2B_3		=	((float)(param[22]*256+param[23])/100);
-//	Con2B_4		=	((float)(param[24]*256+param[25])/100);
-//	Con2B_5		=	((float)(param[26]*256+param[27])/100);
-	
-//	STMFLASH_Read(FLASH_SAVE_ADDR,(uint16_t*)datatemp,SIZE);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -270,38 +245,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//	if(!Radar_Flag){
-//		RadarA_hand();
-//	}
-//	else{
-//		RadarB_hand();
-//	}
 	 One_Radar_hand();
 	 delay_ms(80); 
-//	if((time_100ms%20) == 0)
-//	{
-//		STMFLASH_Read(FLASH_SAVE_ADDR,(uint16_t*)param,SIZE);
-//		Con1A_12	=	((float)(param[0]*256+param[1])/100);
-//		Con1A_3_max	=	((float)(param[2]*256+param[3])/100);
-//		Con1A_3_min	=	((float)(param[4]*256+param[5])/100);
-//		Con1B_12	=	((float)(param[6]*256+param[7])/100);
-//		Con1B_3		=	((float)(param[8]*256+param[9])/100);
-//		Con1B_4		=	((float)(param[10]*256+param[11])/100);
-//		Con1B_5		=	((float)(param[12]*256+param[13])/100);
 
-//		Con2A_12	=	((float)(param[14]*256+param[15])/100);
-//		Con2A_3_max =	((float)(param[16]*256+param[17])/100);
-//		Con2A_3_min	=	((float)(param[18]*256+param[19])/100);
-//		Con2B_12	=	((float)(param[20]*256+param[21])/100);
-//		Con2B_3		=	((float)(param[22]*256+param[23])/100);
-//		Con2B_4		=	((float)(param[24]*256+param[25])/100);
-//		Con2B_5		=	((float)(param[26]*256+param[27])/100);
-//	}
-
-//	if((time_100ms%3) == 0)
-//	{
-////		HAL_UART_Transmit_DMA(&huart1, param, SIZE);
-//	}
   }
   /* USER CODE END 3 */
 }
@@ -387,7 +333,6 @@ uint8_t check_sum(uint8_t *data)
 	uint8_t sum = 0;
 	int crc_sum = 0;
 	for(uint8_t i=0;i<8;i++){
-//		printf(" %02x",data[i]);
 		crc_sum += data[i];
 	}
 	sum = crc_sum&0xff;
@@ -789,7 +734,10 @@ void One_Radar_hand(void)
 		printf("distance=%f sitch:%d\n",distance,HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_2));
 		if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_2)){
 			if(distance <= 0.31f){
-				Out_Ger_led=0; Out_Yellow_led=1; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
+				if(hrt_time(NOW1_R_A_2) > _100ms*6){
+					get_time(&NOW1_R_A_2);
+					Out_Ger_led=0; Out_Yellow_led=1; Out_Red_led=0; In_Red_led^=1; In_Ger_led=0;
+				}
 				printf("ok < 0.3 \n");
 			}
 			else if((distance > 0.31f) && (distance < 0.9f)){
