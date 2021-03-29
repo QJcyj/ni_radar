@@ -734,14 +734,14 @@ void One_Radar_hand(void)
 		printf("distance=%f sitch:%d\n",distance,HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_2));
 		if(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_2)){
 			if(distance <= 0.31f){
-				if(hrt_time(NOW1_R_A_2) > _100ms*6){
+				if(hrt_time(NOW1_R_A_2) > _100ms){
 					get_time(&NOW1_R_A_2);
 					Out_Ger_led=0; Out_Yellow_led=1; Out_Red_led=0; In_Red_led^=1; In_Ger_led=0;
 				}
 				printf("ok < 0.3 \n");
 			}
 			else if((distance > 0.31f) && (distance < 0.9f)){
-				if(hrt_time(NOW3_R) > _100ms*6){
+				if(hrt_time(NOW3_R) > _100ms){
 					get_time(&NOW3_R);
 					Out_Ger_led=0; Out_Yellow_led^=1; Out_Red_led=0; In_Red_led=1; In_Ger_led=0;
 				}
